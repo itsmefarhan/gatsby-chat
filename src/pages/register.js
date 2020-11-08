@@ -5,6 +5,7 @@ import { useMutation } from "@apollo/client"
 import { REGISTER_USER } from "../graphql"
 import { navigate, Link } from "gatsby"
 import SEO from "../components/seo"
+import { useAuthState } from "../context/auth"
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,8 @@ const Register = () => {
   const [errors, setErrors] = useState({})
 
   const { username, email, password, confirmPassword } = formData
+
+  const { user } = useAuthState()
 
   const [register, { loading }] = useMutation(REGISTER_USER, {
     update(_, result) {
@@ -41,6 +44,10 @@ const Register = () => {
     e.preventDefault()
     setErrors({})
     register({ variables: { username, email, password, confirmPassword } })
+  }
+
+  if (user) {
+    navigate("/")
   }
 
   return (

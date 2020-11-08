@@ -5,6 +5,7 @@ import { useLazyQuery } from "@apollo/client"
 import { LOGIN_USER } from "../graphql"
 import { navigate, Link } from "gatsby"
 import SEO from "../components/seo"
+import { useAuthDispatch, useAuthState } from "../context/auth"
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -16,12 +17,15 @@ const Login = () => {
 
   const { email, password } = formData
 
+  const dispatch = useAuthDispatch()
+  const { user } = useAuthState()
+
   const [login, { loading }] = useLazyQuery(LOGIN_USER, {
     onError(err) {
       setErrors(err.graphQLErrors[0].extensions.errors)
     },
     onCompleted(data) {
-      localStorage.setItem("token", data.login.token)
+      dispatch({ type: "LOGIN", payload: data.login })
       setFormData({
         email: "",
         password: "",
@@ -37,6 +41,10 @@ const Login = () => {
     e.preventDefault()
     setErrors({})
     login({ variables: { email, password } })
+  }
+
+  if (user) {
+    navigate("/")
   }
 
   return (
