@@ -27,17 +27,24 @@ module.exports = {
     },
     login: async (_, args) => {
       const { email, password } = args
-      console.log(process.env.JWT_SECRET)
+      let errors = {}
       try {
+        if (!email.trim()) errors.email = "Email is required"
+        if (!password) errors.password = "Password is required"
+        if (Object.keys(errors).length > 0) {
+          throw new UserInputError("Bad request", { errors })
+        }
         const user = await User.findOne({ email })
         if (!user) {
-          return new AuthenticationError("Invalid Credentials")
+          errors.email = "Invalid Credentials"
+          throw new UserInputError("Bad request", { errors })
         }
         const isMatch = await bcrypt.compare(password, user.password)
         if (!isMatch) {
-          return new AuthenticationError("Invalid Credentials")
+          errors.password = "Invalid Credentials"
+          throw new UserInputError("Bad request", { errors })
         }
-        // console.log(user)
+
         const token = jwt.sign({ email }, process.env.JWT_SECRET, {
           expiresIn: "1d",
         })
@@ -48,8 +55,8 @@ module.exports = {
           createdAt: user.createdAt.toISOString(),
           updatedAt: user.updatedAt.toISOString(),
         }
-      } catch (err) {
-        console.log(err)
+      } catch (errors) {
+        throw errors
       }
     },
   },
