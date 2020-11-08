@@ -1,8 +1,9 @@
-const { ApolloServer, gql } = require("apollo-server-lambda")
+const { ApolloServer } = require("apollo-server-lambda")
 const mongoose = require("mongoose")
 const typeDefs = require("./graphql/typeDefs")
-const resolvers = require("./graphql/resolvers")
+const resolvers = require("./graphql/resolvers/index")
 require("dotenv").config()
+const requireLogin = require("./authMiddleware")
 
 mongoose
   .connect("mongodb://localhost:27017/gatsby-chat", {
@@ -17,7 +18,7 @@ mongoose
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: ctx => ctx
+  context: requireLogin,
 })
 
 exports.handler = server.createHandler({

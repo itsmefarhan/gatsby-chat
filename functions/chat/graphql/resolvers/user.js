@@ -1,24 +1,17 @@
-const User = require("../models/User")
+const User = require("../../models/User")
 const { UserInputError, AuthenticationError } = require("apollo-server-lambda")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 
 module.exports = {
   Query: {
-    getUsers: async (_, __, context) => {
-      let user
-      if (context.event.headers.authorization) {
-        const token = context.event.headers.authorization.split(" ")[1]
-        jwt.verify(token, process.env.JWT_SECRET, (err, decode) => {
-          if (err) {
-            throw new AuthenticationError("Access Denied")
-          }
-          user = decode
-          // console.log("user", user)
-        })
+    getUsers: async (_, __, { user }) => {
+      if (!user) {
+        throw new AuthenticationError("Access Denied")
       }
+      // console.log(user)
       try {
-        const users = await User.find({ email: { $ne: user.email } })
+        const users = await User.find({ username: { $ne: user.username } })
         return users
       } catch (err) {
         console.log(err)
@@ -45,9 +38,13 @@ module.exports = {
           throw new UserInputError("Bad request", { errors })
         }
 
-        const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-          expiresIn: "1d",
-        })
+        const token = jwt.sign(
+          { username: user.username },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "1d",
+          }
+        )
         // user.token = token
         return {
           ...user.toJSON(),
@@ -74,8 +71,13 @@ module.exports = {
         if (password !== confirmPassword)
           errors.confirmPassword = "Password must match"
 
-        let user = await User.findOne({ email })
-        if (user) {
+        let userName = await User.findOne({ email })
+        if (userName) {
+          errors.username = "User already exists"
+        }
+
+        let userEmail = await User.findOne({ email })
+        if (userEmail) {
           errors.email = "User already exists"
         }
 
