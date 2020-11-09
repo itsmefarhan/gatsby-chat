@@ -3,8 +3,11 @@ import jwtDecode from "jwt-decode"
 const AuthStateContext = createContext()
 const AuthDispatchContext = createContext()
 
-const token = localStorage.getItem("token")
-let user
+let token
+if (typeof window !== "undefined") {
+  token = localStorage.getItem("token")
+}
+let user = null
 if (token) {
   const decodedToken = jwtDecode(token)
   const expiresAt = new Date(decodedToken.exp * 1000)

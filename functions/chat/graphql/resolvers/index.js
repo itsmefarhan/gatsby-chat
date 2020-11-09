@@ -6,6 +6,10 @@ module.exports = {
     // Convert Messages timestamps into iso string
     createdAt: parent => parent.createdAt.toISOString(),
   },
+  // User: {
+  //   // Convert User timestamps into iso string
+  //   createdAt: parent => parent.createdAt.toISOString(),
+  // },
   Query: {
     ...userResolvers.Query,
     ...messageResolvers.Query,

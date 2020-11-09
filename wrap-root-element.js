@@ -2,13 +2,13 @@ import React from "react"
 import {
   ApolloClient,
   ApolloProvider,
-  HttpLink,
   InMemoryCache,
   createHttpLink,
 } from "@apollo/client"
 import { setContext } from "@apollo/client/link/context"
 import fetch from "cross-fetch"
 import { AuthProvider } from "./src/context/auth"
+import { MessageProvider } from "./src/context/message"
 
 const httpLink = createHttpLink({
   uri: "/.netlify/functions/chat",
@@ -32,6 +32,8 @@ const client = new ApolloClient({
 
 export const wrapRootElement = ({ element }) => (
   <ApolloProvider client={client}>
-    <AuthProvider>{element}</AuthProvider>
+    <AuthProvider>
+      <MessageProvider>{element}</MessageProvider>
+    </AuthProvider>
   </ApolloProvider>
 )

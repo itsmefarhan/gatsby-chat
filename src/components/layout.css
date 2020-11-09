@@ -5,3 +5,11 @@
 body {
     background-color: whitesmoke;
 }
+
+.select-effect {
+  background-color: blanchedalmond;
+}
+
+.hover-effect:hover {
+  background-color: blanchedalmond;
+}

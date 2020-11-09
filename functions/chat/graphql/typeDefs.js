@@ -4,10 +4,12 @@ module.exports = gql`
   type User {
     _id: ID!
     username: String!
-    email: String!
+    email: String
     token: String
+    avatar: String
     createdAt: String!
     updatedAt: String!
+    latestMessage: Message
   }
   type Message {
     _id: ID!

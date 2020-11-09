@@ -1,4 +1,5 @@
 const User = require("../../models/User")
+const Message = require("../../models/Message")
 const { UserInputError, AuthenticationError } = require("apollo-server-lambda")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
@@ -11,7 +12,23 @@ module.exports = {
       }
       // console.log(user)
       try {
-        const users = await User.find({ username: { $ne: user.username } })
+        let users = await User.find({
+          username: { $ne: user.username },
+        }).select("username avatar createdAt")
+        // get messages to / from currently logged in user
+        const allMessages = await Message.find({
+          $or: [{from: user.username}, {to: user.username}]
+        }).sort("-createdAt")
+        
+        users = users.map(singleUser => {
+          const latestMessage = allMessages.find(
+            msg =>
+              msg.from === singleUser.username || msg.to === singleUser.username
+          )
+          singleUser.latestMessage = latestMessage
+          return singleUser
+        })
+
         return users
       } catch (err) {
         console.log(err)

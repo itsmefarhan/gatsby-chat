@@ -32,7 +32,26 @@ export const GET_USERS = gql`
     getUsers {
       _id
       username
-      email
+      createdAt
+      latestMessage {
+        content
+        _id
+        content
+        from
+        to
+        createdAt
+      }
+    }
+  }
+`
+export const GET_MESSAGES = gql`
+  query getmsg($from: String!) {
+    getMessages(from: $from) {
+      from
+      to
+      content
+      createdAt
+      _id
     }
   }
 `
