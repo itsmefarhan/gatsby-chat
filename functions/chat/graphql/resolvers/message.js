@@ -20,7 +20,7 @@ module.exports = {
         const messages = await Message.find({
           from: { $in: names },
           to: { $in: names },
-        }).sort('-createdAt')
+        })
         return messages
       } catch (err) {
         console.log(err)

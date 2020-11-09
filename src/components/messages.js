@@ -1,10 +1,12 @@
-import React, { useEffect } from "react"
-import { Col } from "react-bootstrap"
-import { useLazyQuery } from "@apollo/client"
-import { GET_MESSAGES } from "../graphql"
+import React, { useEffect, useState } from "react"
+import { Col, Form } from "react-bootstrap"
+import { useLazyQuery, useMutation } from "@apollo/client"
+import { GET_MESSAGES, SEND_MESSAGE } from "../graphql"
 import { useMessageState, useMessageDispatch } from "../context/message"
+import Message from "../components/message"
 
 const Messages = () => {
+  const [content, setContent] = useState("")
   const { users } = useMessageState()
   const dispatch = useMessageDispatch()
   const selectedUser = users?.find(user => user.selected === true)
@@ -13,6 +15,18 @@ const Messages = () => {
   const [getMessages, { loading: msgLoading, data: msgData }] = useLazyQuery(
     GET_MESSAGES
   )
+
+  const [sendMessage] = useMutation(SEND_MESSAGE, {
+    onCompleted: data =>
+      dispatch({
+        type: "ADD_MESSAGE",
+        payload: {
+          username: selectedUser.username,
+          message: data.sendMessage,
+        },
+      }),
+    onError: err => console.log("mutation error:", err),
+  })
 
   useEffect(() => {
     if (selectedUser && !selectedUser.messages) {
@@ -38,9 +52,16 @@ const Messages = () => {
   } else if (msgLoading) {
     selectedChat = <p>Loading</p>
   } else if (messages.length > 0) {
-    selectedChat = messages.map(msg => <p key={msg._id}>{msg.content}</p>)
+    selectedChat = messages.map(msg => <Message key={msg._id} msg={msg} />)
   } else if (messages.length === 0) {
     selectedChat = <p>You are now connected. Start chatting</p>
+  }
+
+  const handleSubmit = e => {
+    e.preventDefault()
+    if (content.trim() === "" || !selectedUser) return
+    sendMessage({ variables: { to: selectedUser.username, content } })
+    setContent("")
   }
 
   return (
@@ -48,6 +69,19 @@ const Messages = () => {
       <p className="lead">Messages</p>
       <hr />
       {selectedChat}
+      {selectedUser && (
+        <Form onSubmit={handleSubmit}>
+          <Form.Group>
+            <Form.Control
+              type="text"
+              className="rounded-pill bg-white"
+              placeholder="Type message"
+              value={content}
+              onChange={e => setContent(e.target.value)}
+            />
+          </Form.Group>
+        </Form>
+      )}
     </Col>
   )
 }

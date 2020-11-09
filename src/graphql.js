@@ -27,6 +27,7 @@ export const LOGIN_USER = gql`
     }
   }
 `
+
 export const GET_USERS = gql`
   query {
     getUsers {
@@ -44,6 +45,19 @@ export const GET_USERS = gql`
     }
   }
 `
+
+export const SEND_MESSAGE = gql`
+  mutation sendMessage($to: String!, $content: String!) {
+    sendMessage(to: $to, content: $content) {
+      _id
+      to
+      from
+      content
+      createdAt
+    }
+  }
+`
+
 export const GET_MESSAGES = gql`
   query getmsg($from: String!) {
     getMessages(from: $from) {

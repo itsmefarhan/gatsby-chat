@@ -9,7 +9,7 @@ const Header = ({ siteTitle }) => {
   const { user } = useAuthState()
   const handleLogout = () => {
     dispatch({ type: "LOGOUT" })
-    navigate("/login")
+    window.location.href = "/login"
   }
 
   return (
